@@ -1,10 +1,10 @@
 # Spank
 
-### Ever get so frustrated at your laptop that you just... slap it? 
+### Ever get so frustrated at your bugs that you just wanna slap the laptop? 
 
 Well now it slaps back. Spank listens to your microphone and waits for that desk smack, table knock, or full-on laptop spank — and the moment it hears one, it fires off a random sound effect of your choice. 
 
-Drop in your own audio files, tune the sensitivity (threshold number), and let your laptop finally have a personality when you lose your patience with it.
+Drop in your own audio files, tune the sensitivity (threshold number), and let your laptop finally have a personality when you lose your patience.
 
 ### Libraries used
 
