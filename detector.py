@@ -40,7 +40,7 @@ except Exception:
 SAMPLE_RATE      = 44100   # Hz — standard microphone sample rate
 BLOCK_SIZE       = 512     # Samples per callback block
 CHANNELS         = 1       # Mono input
-THRESHOLD        = 0.008   # RMS level that counts as an impact (tune as needed)
+THRESHOLD        = 0.03   # RMS level that counts as an impact (tune as needed)
 COOLDOWN_SECONDS = 0.5     # Minimum seconds between detections
 SMOOTHING_WINDOW = 10      # Rolling RMS history length (for display)
 BEEP_FREQ_HZ     = 1000    # Fallback beep frequency (Hz)
@@ -56,7 +56,7 @@ SOUNDS_DIR       = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sou
 class SoundPlayer:
     """Discovers audio files in a directory and plays a random one per impact."""
 
-    POST_PLAY_REST = 2.0  # seconds to keep detection blocked after sound finishes
+    POST_PLAY_REST = 1.3  # seconds to keep detection blocked after sound finishes
 
     def __init__(self, sounds_dir: str) -> None:
         self._sounds_dir = sounds_dir
@@ -317,7 +317,3 @@ def main() -> None:
         detector.stop()
 
 
-if __name__ == "__main__":
-    if "--calibrate" in sys.argv or "-c" in sys.argv:
-        Calibrator().run()
-    main()
