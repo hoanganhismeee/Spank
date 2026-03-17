@@ -56,9 +56,12 @@ SOUNDS_DIR       = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sou
 class SoundPlayer:
     """Discovers audio files in a directory and plays a random one per impact."""
 
+    POST_PLAY_REST = 2.0  # seconds to keep detection blocked after sound finishes
+
     def __init__(self, sounds_dir: str) -> None:
         self._sounds_dir = sounds_dir
         self._files: list[str] = []
+        self._mute_until = 0.0  # detection blocked until this timestamp
 
     def load(self) -> None:
         """Scan sounds_dir for supported audio files."""
@@ -74,6 +77,17 @@ class SoundPlayer:
     def play_random(self) -> None:
         """Play a random loaded file in a background thread. Beeps if none loaded."""
         threading.Thread(target=self._play, daemon=True).start()
+
+    def is_playing(self) -> bool:
+        """
+        Return True while an alert sound is playing OR for POST_PLAY_REST seconds
+        after it finishes, so speaker output doesn't re-trigger the mic.
+        """
+        if _PYGAME_OK and pygame.mixer.music.get_busy():
+            # Keep pushing the mute window forward while sound is active
+            self._mute_until = time.time() + self.POST_PLAY_REST
+            return True
+        return time.time() < self._mute_until
 
     def _play(self) -> None:
         if self._files and _PYGAME_OK:
@@ -102,12 +116,14 @@ class AudioDetector:
         threshold: float,
         cooldown: float,
         on_impact,
+        is_busy=None,
         sample_rate: int = SAMPLE_RATE,
         block_size: int = BLOCK_SIZE,
     ) -> None:
         self._threshold    = threshold
         self._cooldown     = cooldown
         self._on_impact    = on_impact
+        self._is_busy      = is_busy or (lambda: False)  # injected; blocks detection while True
         self._sample_rate  = sample_rate
         self._block_size   = block_size
         self._last_trigger = 0.0
@@ -145,6 +161,11 @@ class AudioDetector:
         if now < self._ready_after:
             remaining = self._ready_after - now
             print(f"\r[{bar:<80}] {rms:.5f}  (warming up… {remaining:.1f}s)", end="", flush=True)
+            return
+
+        # Sound feedback guard: ignore mic while alert plays and for 2s after it ends
+        if self._is_busy():
+            print(f"\r[{bar:<80}] {rms:.5f}  (blocked…)", end="", flush=True)
             return
 
         if rms >= self._threshold and (now - self._last_trigger) >= self._cooldown:
@@ -267,6 +288,7 @@ def main() -> None:
         threshold=THRESHOLD,
         cooldown=COOLDOWN_SECONDS,
         on_impact=player.play_random,
+        is_busy=player.is_playing,
     )
 
     print("=" * 60)
