@@ -1,12 +1,16 @@
-Place a WAV file named "impact.wav" in this folder to play it on detection.
-If no file is found, the program falls back to a simple winsound.Beep() tone.
+Place up to 5 audio files in this folder.
+Each spank detection will play one file chosen at random.
 
-Requirements for the WAV file:
-- Format: PCM WAV (uncompressed)
-- Any sample rate / bit depth is fine
-- Keep the filename exactly: impact.wav
+Supported formats: WAV, MP3, OGG, FLAC
+File names: anything you like (e.g. slap1.wav, hit.mp3, ouch.ogg)
+File length: any length — the previous sound is stopped before the new one plays.
 
-MP3 files are NOT supported by winsound. To use MP3 you would need pygame:
-    pip install pygame
-Then replace the PlaySound call in detector.py with:
-    pygame.mixer.Sound("sounds/impact.mp3").play()
+If this folder is empty, the program falls back to a winsound.Beep() tone.
+
+Example layout:
+  sounds/
+    slap1.wav
+    slap2.mp3
+    oof.wav
+    crack.ogg
+    thwack.wav
